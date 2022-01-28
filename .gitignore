@@ -1,0 +1,20 @@
+# IDEs
+/.idea/
+
+# Logs
+*.log
+
+# Dependency directories
+node_modules/
+
+# dotenv environment variables file
+.env
+
+# OS X temporary files
+.DS_Store
+
+# Rush temporary files
+/common/deploy/
+/common/temp/
+/common/autoinstallers/*/.npmrc
+**/.rush/temp/
