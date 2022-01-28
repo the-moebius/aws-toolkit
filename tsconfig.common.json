@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "lib": [
+      "ESNext"
+    ],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "types"
+    ],
+    "strict": true,
+    "noImplicitReturns": true
+  },
+  "files": []
+}

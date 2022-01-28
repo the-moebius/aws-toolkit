@@ -11,8 +11,19 @@
   "ensureConsistentVersions": true,
   "allowMostlyStandardPackageNames": true,
   "repository": {
-    "url": "https://github.com/microsoft/rush-example",
+    "url": "https://github.com/the-moebius/aws-toolkit",
     "defaultBranch": "main"
   },
-  "projects": []
+  "projects": [
+    {
+      "packageName": "@moebius/aws-ecs-task-monitor",
+      "projectFolder": "packages/ecs-task-monitor",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@moebius/aws-ecs-task-runner",
+      "projectFolder": "packages/ecs-task-runner",
+      "shouldPublish": false
+    }
+  ]
 }
