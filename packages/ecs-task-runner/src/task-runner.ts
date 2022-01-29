@@ -2,8 +2,14 @@
 import AWS from 'aws-sdk';
 
 import {
-  TaskMonitor,
+  startTaskMonitor,
   TaskStatus,
+  StatusHandlerFunc,
+  TaskStatusUpdate,
+
+} from '@moebius/aws-ecs-task-monitor';
+
+export {
   StatusHandlerFunc,
 
 } from '@moebius/aws-ecs-task-monitor';
@@ -11,6 +17,7 @@ import {
 
 export interface StartTaskOptions {
   request: AWS.ECS.RunTaskRequest;
+  region?: string;
 }
 
 export interface StartedTask {
@@ -34,17 +41,17 @@ export type MonitorFunction = (
 );
 
 
-const ecs = new AWS.ECS({
-  apiVersion: '2014-11-13',
-});
-
-
 export async function startTask(
   options: StartTaskOptions
 
 ): Promise<StartedTask> {
 
-  const { request } = options;
+  const { request, region } = options;
+
+  const ecs = new AWS.ECS({
+    apiVersion: '2014-11-13',
+    region,
+  });
 
   const result = await (ecs
     .runTask(request)
@@ -75,14 +82,30 @@ export async function startTask(
     const {
       pollingInterval,
       exitProcess,
+      onStatusChange,
 
     } = (options || {});
 
     let exitCode = -1;
 
-    const taskMonitor = new TaskMonitor();
+    const monitorHandler = startTaskMonitor({
+      taskArn,
+      clusterName: request.cluster,
+      pollingInterval,
+      region,
+      onStatusChange: statusChangeHandler,
+    });
 
-    taskMonitor.onStatusChange(update => {
+    await monitorHandler.stopPromise;
+
+    if (exitProcess) {
+      process.exit(exitCode);
+    }
+
+    return { exitCode };
+
+
+    function statusChangeHandler(update: TaskStatusUpdate) {
 
       const { task, status } = update;
 
@@ -99,23 +122,9 @@ export async function startTask(
         exitCode = container.exitCode;
       }
 
-    });
+      onStatusChange?.(update);
 
-    if (options?.onStatusChange) {
-      taskMonitor.onStatusChange(options.onStatusChange);
     }
-
-    await taskMonitor.start({
-      taskArn,
-      clusterName: request.cluster,
-      pollingInterval,
-    });
-
-    if (exitProcess) {
-      process.exit(exitCode);
-    }
-
-    return { exitCode };
 
   }
 

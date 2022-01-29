@@ -7,14 +7,13 @@ export interface TaskMonitorOptions {
   taskArn: string;
   clusterName?: string;
   pollingInterval?: number;
+  region?: string;
+  onStatusChange?: StatusHandlerFunc;
 }
 
-export enum TaskStatus {
-  Provisioning = 'PROVISIONING',
-  Pending = 'PENDING',
-  Running = 'RUNNING',
-  Deprovisioning = 'DEPROVISIONING',
-  Stopped = 'STOPPED',
+export interface TaskMonitorHandler {
+  stop: () => void;
+  stopPromise: Promise<TaskStatusUpdate>;
 }
 
 export type StatusHandlerFunc = (
@@ -26,64 +25,70 @@ export interface TaskStatusUpdate {
   task: AWS.ECS.Task;
 }
 
+export enum TaskStatus {
+  Provisioning = 'PROVISIONING',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Deprovisioning = 'DEPROVISIONING',
+  Stopped = 'STOPPED',
+}
 
-export class TaskMonitor {
 
-  private task?: AWS.ECS.Task;
-  private taskStatus?: TaskStatus;
+export function startTaskMonitor(
+  options: TaskMonitorOptions
 
-  private readonly ecs = new AWS.ECS({
+): TaskMonitorHandler {
+
+  const {
+    pollingInterval = 3000,
+    region,
+
+  } = options;
+
+  let task: AWS.ECS.Task;
+  let taskStatus: TaskStatus;
+
+  const ecs = new AWS.ECS({
     apiVersion: '2014-11-13',
+    region,
   });
 
-  private statusHandlers = new Set<StatusHandlerFunc>();
+  let isRunning = true;
 
-  private isRunning = false;
+  const stopPromise = (async () => {
 
-  private options?: TaskMonitorOptions;
-
-
-  public async start(options: TaskMonitorOptions) {
-
-    if (this.isRunning) {
-      throw new Error(`Task monitoring is already running`);
-    }
-
-    this.options = options;
-
-    const {
-      pollingInterval = 3000,
-
-    } = options;
-
-    this.isRunning = true;
-
-    await pWaitFor(() => this.pollingHandler(), {
+    await pWaitFor(pollingHandler, {
       interval: pollingInterval,
     });
 
+    return {
+      status: taskStatus!,
+      task: task!,
+    };
+
+  })();
+
+  return {
+    stop,
+    stopPromise,
+  };
+
+
+  function stop() {
+    isRunning = false;
   }
 
-  public async stop() {
-    this.isRunning = false;
-  }
+  async function pollingHandler(): Promise<boolean> {
 
-  public onStatusChange(handler: StatusHandlerFunc) {
-    this.statusHandlers.add(handler);
-  }
+    await updateTask();
 
-
-  private async pollingHandler(): Promise<boolean> {
-
-    await this.updateTask();
-
-    await this.handleTaskStatus();
+    await handleTaskStatus();
 
     // Stopping the polling once monitoring is stopped
     // or the task is complete
     return (
-      !this.isRunning ||
-      (this.taskStatus === TaskStatus.Stopped)
+      !isRunning ||
+      (taskStatus === TaskStatus.Stopped)
     );
 
   }
@@ -92,17 +97,13 @@ export class TaskMonitor {
    * Loads fresh task descriptor from the ECS and
    * updated the `task` property.
    */
-  private async updateTask() {
-
-    if (!this.options) {
-      throw new Error(`Missing task monitoring options`);
-    }
+  async function updateTask() {
 
     const {
       clusterName,
       taskArn,
 
-    } = this.options;
+    } = options;
 
     const request: AWS.ECS.DescribeTasksRequest = {
       tasks: [taskArn],
@@ -112,7 +113,7 @@ export class TaskMonitor {
       request.cluster = clusterName;
     }
 
-    const result = await (this.ecs
+    const result = await (ecs
       .describeTasks(request)
       .promise()
     );
@@ -121,40 +122,23 @@ export class TaskMonitor {
       throw new Error(`Failed to fetch task descriptor`);
     }
 
-    this.task = result.tasks![0];
+    task = result.tasks![0];
 
   }
 
-  private async handleTaskStatus() {
-
-    if (!this.task) {
-      return;
-    }
+  async function handleTaskStatus() {
 
     // Checking if status has actually changed between polls
-    if (this.task.lastStatus === this.taskStatus) {
+    if (task.lastStatus === taskStatus) {
       return;
     }
 
-    this.taskStatus = this.task.lastStatus as TaskStatus;
+    taskStatus = task.lastStatus as TaskStatus;
 
-    this.triggerHandlers();
-
-  }
-
-  private triggerHandlers() {
-
-    if (!this.task || !this.taskStatus) {
-      return;
-    }
-
-    // Calling all the registered handlers
-    for (const handler of this.statusHandlers) {
-      handler({
-        status: this.taskStatus,
-        task: this.task,
-      });
-    }
+    options.onStatusChange?.({
+      status: taskStatus,
+      task,
+    });
 
   }
 

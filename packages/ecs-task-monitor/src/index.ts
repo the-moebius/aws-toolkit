@@ -1,9 +1,10 @@
 
 export {
+  startTaskMonitor,
   TaskMonitorOptions,
+  TaskMonitorHandler,
   TaskStatus,
   StatusHandlerFunc,
   TaskStatusUpdate,
-  TaskMonitor,
 
 } from './task-monitor';
