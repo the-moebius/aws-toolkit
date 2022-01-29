@@ -1,7 +1,7 @@
 {
-  "name": "@moebius/aws-ecs-task-monitor",
+  "name": "@moebius/aws-cw-log-streamer",
   "version": "0.0.0",
-  "description": "AWS ECS task monitor",
+  "description": "AWS CloudWatch log streamer",
   "scripts": {
     "build": "rm -rf ./dist && tsc -p ./tsconfig.lib.json",
     "prepack": "npm run build",
@@ -11,7 +11,7 @@
   "types": "dist/types",
   "keywords": [],
   "license": "MIT",
-  "homepage": "https://github.com/the-moebius/aws-toolkit/packages/ecs-task-monitor#readme",
+  "homepage": "https://github.com/the-moebius/aws-toolkit/packages/aws-cw-log-streamer#readme",
   "repository": "github:the-moebius/aws-toolkit",
   "bugs": {
     "url": "https://github.com/the-moebius/aws-toolkit/issues"
@@ -34,11 +34,10 @@
     "aws-sdk": "^2.1066.0"
   },
   "dependencies": {
-    "p-wait-for": "^3.2.0"
   },
   "devDependencies": {
-    "@types/node": "^12.20.42",
     "aws-sdk": "^2.1066.0",
+    "@types/node": "^12.20.42",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.4.0",
     "tsconfig-paths": "^3.12.0",

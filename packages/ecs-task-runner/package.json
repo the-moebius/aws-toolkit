@@ -31,14 +31,15 @@
     "access": "public"
   },
   "peerDependencies": {
-    "aws-sdk": "^2.1065.0"
+    "aws-sdk": "^2.1066.0"
   },
   "dependencies": {
+    "@moebius/aws-cw-log-streamer": "workspace:*",
     "@moebius/aws-ecs-task-monitor": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^12.20.42",
-    "aws-sdk": "^2.1065.0",
+    "aws-sdk": "^2.1066.0",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.4.0",
     "tsconfig-paths": "^3.12.0",

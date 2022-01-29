@@ -1,5 +1,12 @@
 
 import AWS from 'aws-sdk';
+import { TaskDefinition } from 'aws-sdk/clients/ecs';
+
+import {
+  LogStreamerHandle,
+  streamLogs as startLogsStreaming,
+
+} from '@moebius/aws-cw-log-streamer/src/index';
 
 import {
   startTaskMonitor,
@@ -8,6 +15,7 @@ import {
   TaskStatusUpdate,
 
 } from '@moebius/aws-ecs-task-monitor';
+
 
 export {
   StatusHandlerFunc,
@@ -34,11 +42,18 @@ export interface MonitorOptions {
   pollingInterval?: number;
   exitProcess?: boolean;
   onStatusChange?: StatusHandlerFunc;
+  streamLogs?: boolean;
 }
 
 export type MonitorFunction = (
   (options?: MonitorOptions) => Promise<TaskFinishResult>
 );
+
+interface LogConfig {
+  logRegion: string;
+  logGroupName: string;
+  logStreamName: string;
+}
 
 
 export async function startTask(
@@ -83,6 +98,7 @@ export async function startTask(
       pollingInterval,
       exitProcess,
       onStatusChange,
+      streamLogs,
 
     } = (options || {});
 
@@ -95,6 +111,8 @@ export async function startTask(
       region,
       onStatusChange: statusChangeHandler,
     });
+
+    let logStreamerHandle: LogStreamerHandle;
 
     await monitorHandler.stopPromise;
 
@@ -109,22 +127,169 @@ export async function startTask(
 
       const { task, status } = update;
 
+      if (streamLogs) {
+        // Starting the logs streaming
+        if (status === TaskStatus.Running) {
+          beginLogsStreaming();
+        }
+
+        // Stopping the logs streaming
+        switch (status) {
+          case TaskStatus.Deprovisioning:
+          case TaskStatus.Stopped:
+            logStreamerHandle?.stop();
+        }
+      }
+
       if (status === TaskStatus.Stopped) {
+        getExitCode();
+      }
+
+      onStatusChange?.(update);
+
+
+      function getExitCode() {
+
         const container = task.containers?.[0];
         if (!container) {
           throw new Error(
             `Failed to get container from task description`
           );
         }
+
         if (container.exitCode === undefined) {
           throw new Error(`Container exit code is undefined`);
         }
+
         exitCode = container.exitCode;
+
       }
 
-      onStatusChange?.(update);
+      async function beginLogsStreaming() {
+
+        const {
+          logRegion,
+          logGroupName,
+          logStreamName,
+
+        } = await getTaskLogConfig(task);
+
+        console.log(`Starting to stream task logs`);
+
+        logStreamerHandle = startLogsStreaming({
+          logGroupName,
+          logStreamName,
+          region: logRegion,
+        });
+
+      }
 
     }
+
+  }
+
+  async function getTaskLogConfig(
+    task: AWS.ECS.Task
+
+  ): Promise<LogConfig> {
+
+    const taskDefinition = (
+      await getTaskDefinitionForTask(task)
+    );
+
+    const containerDefinition = taskDefinition.containerDefinitions?.[0];
+    if (!containerDefinition) {
+      throw new Error(
+        `Can't get container definition from task definition`
+      );
+    }
+
+    const { logConfiguration } = containerDefinition;
+    if (!logConfiguration) {
+      throw new Error(
+        `Can't get log configuration from container definition`
+      );
+    }
+
+    if (logConfiguration.logDriver !== 'awslogs') {
+      throw new Error(
+        `Can't stream logs using unsupported ` +
+        `log driver: ${logConfiguration.logDriver}`
+      );
+    }
+
+    const logGroupName = (
+      logConfiguration.options?.['awslogs-group']
+    );
+
+    const logStreamPrefix = (
+      logConfiguration.options?.['awslogs-stream-prefix']
+    );
+
+    if (!logStreamPrefix) {
+      throw new Error(
+        `Log configuration without stream prefix ` +
+        `is not supported`
+      );
+    }
+
+    const logRegion = (
+      logConfiguration.options?.['awslogs-region']
+    );
+
+    const logStreamName = (
+      `${logStreamPrefix}/container/${taskId}`
+    );
+
+    if (!logGroupName || !logRegion) {
+      throw new Error(
+        `Missing required awslogs options`
+      );
+    }
+
+    return {
+      logRegion,
+      logGroupName,
+      logStreamName,
+    };
+
+  }
+
+  async function getTaskDefinitionForTask(
+    task: AWS.ECS.Task
+
+  ): Promise<TaskDefinition> {
+
+    if (!task.taskDefinitionArn) {
+      throw new Error(
+        `Missing task definition ARN from task descriptor`
+      );
+    }
+
+    const parts = task.taskDefinitionArn.split('/');
+    const taskDefinitionName = parts[parts.length - 1];
+
+    return getTaskDefinitionByName(taskDefinitionName);
+
+  }
+
+  async function getTaskDefinitionByName(
+    name: string
+
+  ): Promise<TaskDefinition> {
+
+    const result = await (ecs
+      .describeTaskDefinition({
+        taskDefinition: name,
+      })
+      .promise()
+    );
+
+    if (!result.taskDefinition) {
+      throw new Error(`Failed to get task definition: ${name}`);
+    }
+
+    return result.taskDefinition;
 
   }
 
