@@ -1,0 +1,17 @@
+{
+  "name": "@moebius/aws-ecs-task-runner",
+  "entries": [
+    {
+      "version": "1.0.1",
+      "tag": "@moebius/aws-ecs-task-runner_v1.0.1",
+      "date": "Mon, 31 Jan 2022 14:00:39 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Exported some missing symbols"
+          }
+        ]
+      }
+    }
+  ]
+}
