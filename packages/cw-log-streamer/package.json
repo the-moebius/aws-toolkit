@@ -1,6 +1,6 @@
 {
   "name": "@moebius/aws-cw-log-streamer",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "AWS CloudWatch log streamer",
   "scripts": {
     "build": "rm -rf ./dist && tsc -p ./tsconfig.lib.json",

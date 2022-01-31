@@ -1,6 +1,6 @@
 {
   "name": "@moebius/aws-ecs-task-monitor",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "AWS ECS task monitor",
   "scripts": {
     "build": "rm -rf ./dist && tsc -p ./tsconfig.lib.json",
