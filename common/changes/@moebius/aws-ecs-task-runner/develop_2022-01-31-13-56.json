@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@moebius/aws-ecs-task-runner",
+      "comment": "Exported some missing symbols",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@moebius/aws-ecs-task-runner"
+}
