@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@moebius/aws-ecs-update-task-definition",
+      "comment": "Released a first version",
+      "type": "major"
+    }
+  ],
+  "packageName": "@moebius/aws-ecs-update-task-definition"
+}
