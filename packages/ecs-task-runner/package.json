@@ -1,6 +1,6 @@
 {
   "name": "@moebius/aws-ecs-task-runner",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "AWS ECS task runner",
   "scripts": {
     "build": "rm -rf ./dist && tsc -p ./tsconfig.lib.json",
