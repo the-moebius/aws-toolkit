@@ -20,6 +20,7 @@ import {
 export {
   StatusHandlerFunc,
   TaskStatusUpdate,
+  TaskStatus,
 
 } from '@moebius/aws-ecs-task-monitor';
 

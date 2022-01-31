@@ -8,5 +8,6 @@ export {
   TaskFinishResult,
   StatusHandlerFunc,
   TaskStatusUpdate,
+  TaskStatus,
 
 } from './task-runner';

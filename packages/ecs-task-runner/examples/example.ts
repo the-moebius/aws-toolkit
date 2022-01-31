@@ -1,8 +1,13 @@
 
 import * as process from 'process';
 
-import { TaskStatus, TaskStatusUpdate } from '@moebius/aws-ecs-task-monitor';
-import { startTask, StartTaskOptions } from '@moebius/aws-ecs-task-runner';
+import {
+  startTask,
+  StartTaskOptions,
+  TaskStatusUpdate,
+  TaskStatus,
+
+} from '@moebius/aws-ecs-task-runner';
 
 
 (async () => {
