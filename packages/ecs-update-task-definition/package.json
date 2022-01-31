@@ -1,6 +1,6 @@
 {
   "name": "@moebius/aws-ecs-update-task-definition",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Utility to update AWS ECS task definition",
   "scripts": {
     "build": "rm -rf ./dist && tsc -p ./tsconfig.lib.json",
