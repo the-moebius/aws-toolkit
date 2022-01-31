@@ -29,6 +29,11 @@
       "packageName": "@moebius/aws-ecs-task-runner",
       "projectFolder": "packages/ecs-task-runner",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@moebius/aws-ecs-update-task-definition",
+      "projectFolder": "packages/ecs-update-task-definition",
+      "shouldPublish": true
     }
   ]
 }

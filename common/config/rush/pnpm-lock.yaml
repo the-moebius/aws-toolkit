@@ -61,6 +61,22 @@ importers:
       tsconfig-paths: 3.12.0
       typescript: 4.5.5
 
+  ../../packages/ecs-update-task-definition:
+    specifiers:
+      '@types/node': ^12.20.42
+      aws-sdk: ^2.1066.0
+      npm-run-all: ^4.1.5
+      ts-node: ^10.4.0
+      tsconfig-paths: ^3.12.0
+      typescript: ^4.5.5
+    devDependencies:
+      '@types/node': 12.20.42
+      aws-sdk: 2.1066.0
+      npm-run-all: 4.1.5
+      ts-node: 10.4.0_78f56ccfed057bb4524ed55ce6f76db4
+      tsconfig-paths: 3.12.0
+      typescript: 4.5.5
+
 packages:
 
   /@cspotcode/source-map-consumer/0.8.0:
