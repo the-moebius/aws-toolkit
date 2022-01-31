@@ -7,5 +7,6 @@ export {
   MonitorOptions,
   TaskFinishResult,
   StatusHandlerFunc,
+  TaskStatusUpdate,
 
 } from './task-runner';

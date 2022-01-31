@@ -6,7 +6,7 @@ import {
   LogStreamerHandle,
   streamLogs as startLogsStreaming,
 
-} from '@moebius/aws-cw-log-streamer/src/index';
+} from '@moebius/aws-cw-log-streamer';
 
 import {
   startTaskMonitor,
@@ -19,6 +19,7 @@ import {
 
 export {
   StatusHandlerFunc,
+  TaskStatusUpdate,
 
 } from '@moebius/aws-ecs-task-monitor';
 
