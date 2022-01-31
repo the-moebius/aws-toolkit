@@ -18,17 +18,17 @@
     {
       "packageName": "@moebius/aws-cw-log-streamer",
       "projectFolder": "packages/cw-log-streamer",
-      "shouldPublish": false
+      "shouldPublish": true
     },
     {
       "packageName": "@moebius/aws-ecs-task-monitor",
       "projectFolder": "packages/ecs-task-monitor",
-      "shouldPublish": false
+      "shouldPublish": true
     },
     {
       "packageName": "@moebius/aws-ecs-task-runner",
       "projectFolder": "packages/ecs-task-runner",
-      "shouldPublish": false
+      "shouldPublish": true
     }
   ]
 }
