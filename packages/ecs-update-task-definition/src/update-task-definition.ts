@@ -28,10 +28,19 @@ export interface UpdateTaskDefinitionOptions {
 export type ContainerIndex = number;
 export type ContainerName = string;
 
+export interface UpdateTaskDefinitionResult {
+
+  name: string;
+
+  revision: number;
+
+}
+
 
 export async function updateTaskDefinition(
   options: UpdateTaskDefinitionOptions
-) {
+
+): Promise<UpdateTaskDefinitionResult> {
 
   const {
     name,
@@ -100,24 +109,39 @@ export async function updateTaskDefinition(
 
   applyContainerOverrides();
 
-  const result = await (ecs
+  const { taskDefinition: newTaskDefinition } = await (ecs
     .registerTaskDefinition(request)
     .promise()
   );
 
-  if (result.taskDefinition) {
-    console.log(
-      `\nSuccessfully registered new task definition:\n` +
-      `${result.taskDefinition.family}` +
-      `revision: ${result.taskDefinition.revision}`
-    );
-
-  } else {
+  if (!newTaskDefinition) {
     throw new Error(
       `Failed to register updated task definition`
     );
-
   }
+
+  if (!newTaskDefinition.family) {
+    throw new Error(
+      `Missing family from new task definition`
+    );
+  }
+
+  if (!newTaskDefinition.revision) {
+    throw new Error(
+      `Missing revision from new task definition`
+    );
+  }
+
+  console.log(
+    `\nSuccessfully registered new task definition:\n` +
+    `${newTaskDefinition.family}` +
+    `revision: ${newTaskDefinition.revision}`
+  );
+
+  return {
+    name: `${newTaskDefinition.family}:${newTaskDefinition.revision}`,
+    revision: newTaskDefinition.revision,
+  };
 
 
   function applyContainerOverrides() {
