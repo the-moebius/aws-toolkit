@@ -2,6 +2,18 @@
   "name": "@moebius/aws-ecs-update-task-definition",
   "entries": [
     {
+      "version": "1.1.0",
+      "tag": "@moebius/aws-ecs-update-task-definition_v1.1.0",
+      "date": "Tue, 01 Feb 2022 13:39:09 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Updated function to return results"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@moebius/aws-ecs-update-task-definition_v1.0.0",
       "date": "Mon, 31 Jan 2022 19:07:59 GMT",
